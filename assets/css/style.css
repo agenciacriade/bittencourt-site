@@ -1,0 +1,978 @@
+@import url('fonts.css');
+
+/* ============================================================
+   Bittencourt Odontologia — Agência Criade
+   Tokens: BRANCO predominante + cinzas neutros nos leitos (set/2026);
+   o rosa da marca é só ACENTO (botão, selo, rubrica, hover).
+   A exceção é a página do Projeto Despertar (.tema-despertar), toda rosa.
+   ============================================================ */
+:root {
+  --rosa: #E6357E;
+  --rosa-escuro: #C72E6E;
+  --rosa-claro: #FDEEF4;
+  --rosa-nevoa: #FDF7F9;
+  --rosa-suave: #F4A9C8;
+  --tinta: #1F2124;
+  --tinta-rgb: 31, 33, 36;
+  --tinta-media: #4B4F55;
+  --tinta-fraca: #7C8087;
+  --linha: #E4E6E9;
+  --cinza-50: #F8F8F9;
+  --cinza-100: #F1F2F4;
+  --cinza-200: #E7E9EC;
+  --branco: #fff;
+  --dourado: #E8A33D;
+
+  --serifa: 'Playfair Display', Georgia, serif;
+  --corpo: 'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --largura: 1180px;
+  --raio: 18px;
+  --raio-p: 12px;
+  --sombra: 0 4px 18px rgba(var(--tinta-rgb), .07);
+  --sombra-alta: 0 18px 44px rgba(var(--tinta-rgb), .16);
+  /* curvas: saída rápida e chegada longa = movimento que parece ter peso */
+  --transicao: .42s cubic-bezier(.16, .84, .32, 1);
+  --transicao-longa: .78s cubic-bezier(.16, .84, .32, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; scroll-padding-top: 88px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  margin: 0;
+  font-family: var(--corpo);
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1.72;
+  color: var(--tinta-media);
+  background: var(--branco);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--serifa);
+  font-weight: 600;
+  color: var(--tinta);
+  line-height: 1.15;
+  margin: 0 0 .5em;
+  letter-spacing: -.01em;
+}
+h1 { font-size: clamp(2.1rem, 5.2vw, 3.6rem); }
+h2 { font-size: clamp(1.75rem, 3.6vw, 2.7rem); }
+h3 { font-size: clamp(1.15rem, 2vw, 1.4rem); }
+p { margin: 0 0 1.15em; }
+p:last-child { margin-bottom: 0; }
+img { max-width: 100%; height: auto; display: block; }
+a { color: var(--rosa); text-decoration: none; transition: color var(--transicao); }
+a:hover { color: var(--rosa-escuro); }
+
+.env { width: min(100% - 2.5rem, var(--largura)); margin-inline: auto; position: relative; z-index: 1; }
+
+/* ============================================================
+   FUNDOS — nada de branco chapado. Cada seção ganha um leito de
+   gradiente rosa + manchas desfocadas que respiram devagar.
+   Só transform/opacity animam (GPU), e tudo para em reduced-motion.
+   ============================================================ */
+.secao { position: relative; padding: clamp(3.5rem, 8vw, 6.5rem) 0; overflow: hidden; isolation: isolate; }
+
+/* Três leitos neutros: branco (leve) > névoa (quase branco) > clara (cinza
+   perolado). O branco manda; o cinza só separa uma seção da outra. */
+.secao--nevoa {
+  background:
+    radial-gradient(1200px 620px at 12% -8%, rgba(255, 255, 255, .9), transparent 62%),
+    linear-gradient(168deg, #FCFCFD 0%, var(--cinza-50) 50%, var(--cinza-100) 100%);
+}
+.secao--clara {
+  background:
+    radial-gradient(820px 480px at 88% -12%, rgba(255, 255, 255, .85), transparent 58%),
+    linear-gradient(150deg, var(--cinza-100) 0%, #ECEEF0 55%, var(--cinza-100) 100%);
+}
+.secao--leve { background: #fff; }
+
+/* FLUIDEZ — as seções deslizam umas sobre as outras em vez de emendar em
+   linha reta. O raio no topo + margem negativa cria a leitura de camadas. */
+.secao--fluida {
+  border-radius: clamp(28px, 5vw, 64px) clamp(28px, 5vw, 64px) 0 0;
+  margin-top: calc(-1 * clamp(28px, 5vw, 64px));
+  padding-top: calc(clamp(3.5rem, 8vw, 6.5rem) + clamp(28px, 5vw, 64px));
+  z-index: 2;
+}
+.secao--fluida + .secao--fluida { z-index: 3; }
+.secao--escura.secao--fluida + .secao { z-index: 4; }
+/* faixas de largura total não podem ser cobertas pela seção seguinte */
+.faixa, .confianca { position: relative; z-index: 5; }
+.faixa + .secao--fluida, .confianca + .secao--fluida, .capa + .secao--fluida {
+  margin-top: 0;
+  padding-top: clamp(3.5rem, 8vw, 6.5rem);
+  border-radius: 0;
+}
+
+/* trama de pontos: textura de perto, uniforme de longe */
+.secao--trama::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background-image: radial-gradient(rgba(var(--tinta-rgb), .13) 1px, transparent 1px);
+  background-size: 22px 22px;
+  -webkit-mask-image: radial-gradient(78% 62% at 50% 42%, #000 12%, transparent 78%);
+  mask-image: radial-gradient(78% 62% at 50% 42%, #000 12%, transparent 78%);
+  opacity: .6;
+}
+
+/* manchas que flutuam devagar — cinza-azulado neutro; só a --c guarda um
+   sopro de rosa, pra o cinza não ficar hospitalar */
+.mancha {
+  position: absolute; z-index: -1; border-radius: 50%; pointer-events: none;
+  filter: blur(64px); opacity: .5;
+  will-change: transform;
+  animation: boiar 22s ease-in-out infinite alternate;
+}
+.mancha--a { width: 44vw; max-width: 560px; aspect-ratio: 1; left: -12%; top: -14%;
+  background: radial-gradient(circle, rgba(150, 158, 170, .30), rgba(150, 158, 170, 0) 68%); }
+.mancha--b { width: 38vw; max-width: 470px; aspect-ratio: 1; right: -10%; bottom: -18%;
+  background: radial-gradient(circle, rgba(190, 196, 205, .40), rgba(190, 196, 205, 0) 68%);
+  animation-duration: 27s; animation-delay: -8s; }
+.mancha--c { width: 30vw; max-width: 380px; aspect-ratio: 1; right: 14%; top: -12%;
+  background: radial-gradient(circle, rgba(230, 53, 126, .10), rgba(230, 53, 126, 0) 66%);
+  animation-duration: 31s; animation-delay: -14s; }
+
+@keyframes boiar {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to   { transform: translate3d(3.5vw, -3vh, 0) scale(1.14); }
+}
+
+.selo {
+  display: inline-block;
+  font-size: .74rem;
+  font-weight: 600;
+  letter-spacing: .17em;
+  text-transform: uppercase;
+  color: var(--rosa);
+  margin-bottom: 1rem;
+}
+.secao__cabeca { max-width: 720px; margin-bottom: clamp(2rem, 4vw, 3.2rem); }
+.secao__cabeca--centro { margin-inline: auto; text-align: center; }
+.chamada { font-size: 1.05rem; color: var(--tinta-media); }
+
+/* ---------- botões ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+  padding: .95rem 1.9rem;
+  border: 0;
+  border-radius: 999px;
+  font-family: var(--corpo);
+  font-size: .95rem;
+  font-weight: 600;
+  letter-spacing: .01em;
+  cursor: pointer;
+  transition: transform var(--transicao), box-shadow var(--transicao),
+              background-color var(--transicao), color var(--transicao);
+}
+.btn--principal { background: var(--rosa); color: #fff; box-shadow: 0 8px 22px rgba(230, 53, 126, .28); }
+.btn--principal:hover { background: var(--rosa-escuro); color: #fff; transform: translateY(-3px); box-shadow: 0 14px 30px rgba(230, 53, 126, .36); }
+.btn--contorno { background: transparent; color: var(--tinta); box-shadow: inset 0 0 0 1.5px var(--linha); }
+.btn--contorno:hover { color: var(--rosa); box-shadow: inset 0 0 0 1.5px var(--rosa); transform: translateY(-3px); }
+.btn--claro { background: rgba(255, 255, 255, .12); color: #fff; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .55); backdrop-filter: blur(4px); }
+.btn--claro:hover { background: #fff; color: var(--tinta); transform: translateY(-3px); }
+
+/* ---------- cabeçalho ---------- */
+.topo {
+  position: fixed; inset: 0 0 auto; z-index: 90;
+  padding: 1.1rem 0;
+  transition: background-color var(--transicao), box-shadow var(--transicao), padding var(--transicao);
+}
+.topo__grade { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; }
+.topo__logo { display: block; width: clamp(140px, 16vw, 178px); }
+.topo:not(.topo--fixo) .topo__logo .marca { filter: brightness(0) invert(1); }
+.topo__logo .marca { transition: filter var(--transicao); }
+.topo--fixo { background: rgba(255, 255, 255, .96); box-shadow: 0 2px 20px rgba(var(--tinta-rgb), .09); padding: .65rem 0; backdrop-filter: blur(10px); }
+
+.menu { display: flex; align-items: center; gap: clamp(1rem, 2.4vw, 2rem); }
+.menu a {
+  position: relative;
+  font-size: .82rem; font-weight: 600; letter-spacing: .13em; text-transform: uppercase;
+  color: #fff; padding: .35rem 0;
+}
+.topo--fixo .menu a { color: var(--tinta); }
+.menu a::after {
+  content: ''; position: absolute; left: 0; bottom: 0; height: 2px; width: 0;
+  background: var(--rosa); transition: width var(--transicao);
+}
+.menu a:hover::after, .menu a[aria-current="page"]::after { width: 100%; }
+.menu a:hover { color: var(--rosa); }
+.menu .btn { padding: .7rem 1.4rem; font-size: .78rem; letter-spacing: .1em; text-transform: uppercase; }
+.menu .btn::after { display: none; }
+.menu .btn:hover { color: #fff; }
+
+.hamburger {
+  display: none; width: 44px; height: 44px; border: 0; background: none; cursor: pointer;
+  padding: 10px; align-items: center; justify-content: center;
+}
+.hamburger span { display: block; width: 24px; height: 2px; background: #fff; position: relative; transition: var(--transicao); }
+.hamburger span::before, .hamburger span::after {
+  content: ''; position: absolute; left: 0; width: 24px; height: 2px; background: inherit; transition: var(--transicao);
+}
+.hamburger span::before { top: -7px; }
+.hamburger span::after { top: 7px; }
+.topo--fixo .hamburger span, .topo--fixo .hamburger span::before, .topo--fixo .hamburger span::after { background: var(--tinta); }
+.topo--aberto .hamburger span { background: transparent !important; }
+.topo--aberto .hamburger span::before { top: 0; transform: rotate(45deg); }
+.topo--aberto .hamburger span::after { top: 0; transform: rotate(-45deg); }
+
+/* ---------- marca que se escreve ----------
+   O logo é uma pincelada cursiva: separei em 3 camadas (assinatura, risco e
+   subtítulo) e a máscara corre da esquerda para a direita — a mesma direção
+   em que a cursiva é de fato traçada. No repouso fica inteiro; o hover
+   reescreve. */
+.marca {
+  position: relative; display: block; width: 100%;
+  aspect-ratio: 1000 / 328;
+}
+.marca__cam {
+  position: absolute; inset: 0;
+  background-repeat: no-repeat; background-position: left center; background-size: contain;
+  /* a borda do gradiente é a ponta da caneta: o preto já foi escrito */
+  -webkit-mask-image: linear-gradient(100deg, #000 40%, rgba(0, 0, 0, .5) 46%, transparent 53%);
+  mask-image: linear-gradient(100deg, #000 40%, rgba(0, 0, 0, .5) 46%, transparent 53%);
+  -webkit-mask-size: 265% 100%; mask-size: 265% 100%;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: 0% 0; mask-position: 0% 0;   /* repouso: tudo escrito */
+}
+.marca__cam--assinatura { background-image: url(../img/logo-assinatura.webp); }
+.marca__cam--risco { background-image: url(../img/logo-risco.webp); }
+.marca__cam--subtitulo { background-image: url(../img/logo-subtitulo.webp); -webkit-mask-image: none; mask-image: none; }
+
+/* CAMADA SECUNDÁRIA: o brilho da ponta da caneta. É a mesma assinatura, mais
+   clara, vista por uma FRESTA estreita que viaja junto com a frente da máscara.
+   Sem ela a escrita é só um wipe; com ela existe um instrumento escrevendo. */
+.marca__cam--ponta {
+  background-image: url(../img/logo-assinatura.webp);
+  /* rosa claro clareado ainda é rosa claro: para a ponta LER, ela vira quase
+     branca e ganha um halo. */
+  filter: brightness(2.2) saturate(.35) drop-shadow(0 0 6px rgba(255, 255, 255, .9));
+  opacity: 0;
+  -webkit-mask-image: linear-gradient(100deg, transparent 36%, rgba(0, 0, 0, .45) 42%, #000 45.5%, rgba(0, 0, 0, .4) 49%, transparent 55%);
+  mask-image: linear-gradient(100deg, transparent 36%, rgba(0, 0, 0, .45) 42%, #000 45.5%, rgba(0, 0, 0, .4) 49%, transparent 55%);
+}
+
+/* Ritmo de mão: uma caneta não desliza em velocidade constante — ela hesita ao
+   partir, corre nos traços retos e segura nas laçadas. linear() desenha esse
+   pulso; cubic-bezier antes é o fallback para navegador que não suporta. */
+@keyframes escrever {
+  from { -webkit-mask-position: 100% 0; mask-position: 100% 0; }
+  to   { -webkit-mask-position: 0% 0;   mask-position: 0% 0; }
+}
+@keyframes rubricar {
+  from { -webkit-mask-position: 100% 0; mask-position: 100% 0; }
+  to   { -webkit-mask-position: 0% 0;   mask-position: 0% 0; }
+}
+/* a ponta acende ao partir e apaga quando a mão levanta */
+@keyframes acender {
+  0%   { opacity: 0; }
+  9%   { opacity: .85; }
+  88%  { opacity: .7; }
+  100% { opacity: 0; }
+}
+/* antecipação: a marca recua um fio antes de a caneta encostar */
+@keyframes preparar {
+  0%   { transform: translateX(-4px) scale(.994); }
+  7%   { transform: translateX(-5px) scale(.992); }
+  100% { transform: none; }
+}
+@keyframes assentar {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.marca__cam--assinatura, .marca__cam--ponta {
+  animation-timing-function: cubic-bezier(.32, .04, .18, .99);
+  /* partida decidida (a caneta encosta e já anda), micro-variações no meio
+     — acelera nos traços retos, segura nas laçadas — e arremate no fim.
+     A versão anterior começava em .012 aos 3% e criava meio segundo de nada:
+     isso não lê como elegância, lê como travamento. */
+  animation-timing-function: linear(
+    0, .048 4%, .112 9%, .175 14%, .202 17%, .288 24%, .318 27%, .402 35%,
+    .432 38%, .527 47%, .558 50%, .658 60%, .702 65%, .797 74%, .848 80%,
+    .916 88%, .966 94%, 1);
+}
+
+/* Coreografia — o gesto tem três tempos, não três animações soltas:
+   1. a palavra é escrita com cuidado (2s)
+   2. a rubrica cruza por baixo num golpe só, ainda com a palavra terminando
+   3. o subtítulo assenta por último, quando a mão já saiu */
+.marca:hover, .topo__logo:focus-visible .marca, .rodape__marca:focus-visible .marca {
+  animation: preparar 2.25s cubic-bezier(.22, .7, .25, 1) both;
+}
+.marca:hover .marca__cam--assinatura,
+.topo__logo:focus-visible .marca .marca__cam--assinatura,
+.rodape__marca:focus-visible .marca .marca__cam--assinatura {
+  animation-name: escrever; animation-duration: 2.05s;
+  animation-delay: .06s; animation-fill-mode: both;
+}
+.marca:hover .marca__cam--ponta,
+.topo__logo:focus-visible .marca .marca__cam--ponta,
+.rodape__marca:focus-visible .marca .marca__cam--ponta {
+  animation-name: escrever, acender;
+  animation-duration: 2.05s, 2.05s;
+  animation-delay: .06s, .06s;
+  animation-fill-mode: both, both;
+}
+/* a rubrica é um gesto rápido: 3x mais veloz que a palavra, e entra por cima
+   do fim dela (sobreposição = gesto contínuo; fila = animação de slide) */
+.marca:hover .marca__cam--risco,
+.topo__logo:focus-visible .marca .marca__cam--risco,
+.rodape__marca:focus-visible .marca .marca__cam--risco {
+  animation: rubricar .62s cubic-bezier(.18, .82, .26, 1) 1.62s both;
+}
+/* entra ainda com a rubrica terminando: fila cria buraco, sobreposição
+   mantém o gesto contínuo */
+.marca:hover .marca__cam--subtitulo,
+.topo__logo:focus-visible .marca .marca__cam--subtitulo,
+.rodape__marca:focus-visible .marca .marca__cam--subtitulo {
+  animation: assentar .6s cubic-bezier(.4, 0, .2, 1) 2.02s both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .marca:hover, .topo__logo:focus-visible .marca, .rodape__marca:focus-visible .marca,
+  .marca:hover .marca__cam, .topo__logo:focus-visible .marca .marca__cam,
+  .rodape__marca:focus-visible .marca .marca__cam { animation: none; }
+  .marca__cam--ponta { display: none; }
+}
+
+/* ---------- hero ---------- */
+.hero { position: relative; min-height: clamp(560px, 92vh, 820px); display: grid; align-items: center; overflow: hidden; }
+.hero__fundos { position: absolute; inset: 0; }
+.hero__fundo {
+  position: absolute; inset: 0; opacity: 0;
+  background-size: cover; background-position: center;
+  transition: opacity 2s cubic-bezier(.4, 0, .2, 1), transform 12s linear;
+  transform: scale(1.08);
+}
+.hero__fundo.ativo { opacity: 1; transform: scale(1); }
+/* scrim em GRADIENTE: escuro onde mora o texto, limpo do lado da foto.
+   A fachada é uma foto MUITO clara e tem o logo pintado na parede — sem um
+   scrim forte à esquerda o título branco lava e colide com o logo. */
+.hero::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(20, 10, 15, .45) 0%, rgba(20, 10, 15, 0) 26%),
+    linear-gradient(95deg, rgba(18, 9, 13, .93) 0%, rgba(18, 9, 13, .86) 30%,
+      rgba(18, 9, 13, .66) 52%, rgba(18, 9, 13, .34) 74%, rgba(18, 9, 13, .12) 92%,
+      rgba(18, 9, 13, .04) 100%);
+}
+.hero__conteudo { position: relative; z-index: 2; padding: 8rem 0 4rem; max-width: 640px; }
+.hero .selo { color: var(--rosa-suave); }
+.hero h1 { color: #fff; margin-bottom: 1.4rem; }
+.hero__sub { color: #EEEFF1; font-size: 1.06rem; font-weight: 400; margin-bottom: 2.2rem; max-width: 30em; }
+.hero__acoes { display: flex; flex-wrap: wrap; gap: .9rem; }
+.hero__pontos { position: absolute; left: 50%; transform: translateX(-50%); bottom: 2rem; z-index: 3; display: flex; gap: .55rem; }
+.hero__ponto { width: 30px; height: 3px; border: 0; padding: 0; border-radius: 2px; background: rgba(255, 255, 255, .4); cursor: pointer; transition: var(--transicao); }
+.hero__ponto.ativo { background: var(--rosa); width: 46px; }
+
+/* ---------- faixa de confiança ---------- */
+.confianca { background: var(--tinta); color: #fff; padding: 1.7rem 0; }
+.confianca__grade { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1.4rem; text-align: center; }
+.confianca__item strong { display: block; font-family: var(--serifa); font-size: 1.55rem; color: #fff; line-height: 1.2; }
+.confianca__item span { font-size: .82rem; color: rgba(255, 255, 255, .68); letter-spacing: .04em; }
+/* precisa bater a especificidade de `.confianca__item strong`, senão fica branco */
+.confianca__item strong.confianca__estrelas { color: var(--dourado); letter-spacing: .06em; }
+
+/* ---------- blocos de mídia + texto ---------- */
+.duo { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 4.5rem); align-items: center; }
+.duo--invertido .duo__midia { order: 2; }
+.duo__midia img { border-radius: var(--raio); box-shadow: var(--sombra-alta); width: 100%; }
+.duo__midia { position: relative; }
+
+/* campanha do mês */
+.campanha { background: #fff; border: 1px solid var(--linha); box-shadow: var(--sombra); border-radius: calc(var(--raio) + 6px); padding: clamp(1.8rem, 4vw, 3.4rem); }
+.campanha .duo { align-items: center; }
+
+/* ---------- seção escura (casos clínicos) ----------
+   As fotos de antes/depois vêm com fundo preto e os selos já queimados nos
+   pixels: em vez de brigar com isso, a seção adota o preto como fundo. */
+.secao--escura { background: var(--tinta); color: rgba(255, 255, 255, .74); }
+.secao--escura h2, .secao--escura h3 { color: #fff; }
+.secao--escura .selo { color: var(--rosa-suave); }
+.secao--escura .chamada { color: rgba(255, 255, 255, .74); }
+.casos { display: grid; grid-template-columns: 1fr 1fr; gap: 1.6rem; margin-top: 2.6rem; }
+.casos img { border-radius: var(--raio); width: 100%; }
+.casos figcaption { font-size: .78rem; color: rgba(255, 255, 255, .45); text-align: center; margin-top: .7rem; }
+.casos figure { margin: 0; }
+@media (max-width: 700px) { .casos { grid-template-columns: 1fr; } }
+
+/* ---------- comparador antes/depois ---------- */
+.comparador {
+  position: relative; border-radius: var(--raio); overflow: hidden;
+  box-shadow: var(--sombra-alta); touch-action: pan-y; user-select: none; cursor: ew-resize;
+  max-width: 860px; margin-inline: auto;
+}
+.comparador img { width: 100%; display: block; pointer-events: none; }
+/* a camada de cima é cortada pela largura; a imagem dentro dela mantém a
+   largura ORIGINAL (height:100% + width:auto), senão o rosto esticaria */
+.comparador__depois { position: absolute; inset: 0; width: 50%; overflow: hidden; }
+.comparador__depois img { position: absolute; top: 0; left: 0; height: 100%; width: auto; max-width: none; }
+.comparador__alca {
+  position: absolute; top: 0; bottom: 0; left: 50%; width: 2px;
+  background: rgba(255, 255, 255, .92); transform: translateX(-50%);
+  pointer-events: none; box-shadow: 0 0 14px rgba(0, 0, 0, .45);
+}
+.comparador__alca::after {
+  content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 52px; height: 52px; border-radius: 50%; background: #fff;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .32);
+}
+.comparador__alca::before {
+  content: '‹\00a0›'; position: absolute; top: 50%; left: 50%; z-index: 2;
+  transform: translate(-50%, -50%); color: var(--rosa); font-size: 1.45rem;
+  font-weight: 700; line-height: 1; white-space: nowrap;
+}
+.comparador__rotulo {
+  position: absolute; bottom: 1rem; z-index: 2; padding: .34rem .9rem; border-radius: 999px;
+  background: rgba(20, 10, 15, .58); color: #fff; font-size: .68rem; font-weight: 600;
+  letter-spacing: .16em; text-transform: uppercase; backdrop-filter: blur(6px);
+  pointer-events: none;
+}
+.comparador__rotulo--a { left: 1rem; }
+.comparador__rotulo--b { right: 1rem; }
+.comparador:focus-visible { outline: 3px solid var(--rosa); outline-offset: 3px; }
+.comparador__dica {
+  text-align: center; font-size: .78rem; color: rgba(255, 255, 255, .5);
+  margin-top: 1rem; letter-spacing: .04em;
+}
+
+/* ---------- grades de cartão ---------- */
+.grade { display: grid; gap: 1.5rem; }
+.grade--2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.grade--3 { grid-template-columns: repeat(auto-fit, minmax(292px, 1fr)); }
+.grade--4 { grid-template-columns: repeat(auto-fit, minmax(232px, 1fr)); }
+
+/* ---------- cartões ----------
+   Entrada: cada cartão sobe e cresce um fio, em cascata curta (--n * 55ms).
+   Hover: elevação + a sombra chega DEPOIS do cartão (follow-through) + a
+   rubrica da marca cresce embaixo — o mesmo gesto dos títulos e do logo. */
+.cartao {
+  position: relative; overflow: hidden;
+  background: #fff; border: 1px solid var(--linha); border-radius: var(--raio);
+  padding: 2rem 1.7rem; box-shadow: var(--sombra);
+  transition: transform var(--transicao), box-shadow .5s cubic-bezier(.16, .84, .32, 1) .04s,
+              border-color var(--transicao);
+}
+.cartao::after {
+  content: ''; position: absolute; left: 1.7rem; bottom: 0; height: 3px; width: 46px;
+  border-radius: 3px 3px 0 0;
+  background: linear-gradient(90deg, var(--rosa), var(--rosa-suave));
+  transform: scaleX(0); transform-origin: 0 50%;
+  transition: transform .5s cubic-bezier(.18, .82, .26, 1);
+}
+.cartao:hover { transform: translateY(-8px); box-shadow: var(--sombra-alta); border-color: rgba(230, 53, 126, .38); }
+.cartao:hover::after { transform: scaleX(1); }
+.cartao h3 { margin-bottom: .6rem; transition: color var(--transicao); }
+.cartao:hover h3 { color: var(--rosa); }
+.cartao p { font-size: .95rem; }
+.cartao__num {
+  font-family: var(--serifa); font-size: 1.6rem; color: var(--rosa);
+  display: block; margin-bottom: .5rem;
+  transition: transform var(--transicao), opacity var(--transicao);
+}
+.cartao:hover .cartao__num { transform: translateX(4px); opacity: .55; }
+
+/* toque: sem hover, o dedo precisa de resposta na hora */
+.cartao:active, .esp:active, .depo:active, .proc__item:active, .post:active { transform: translateY(-2px) scale(.995); }
+
+/* especialidades — cartão fotográfico */
+.esp {
+  position: relative; display: block; overflow: hidden;
+  aspect-ratio: 4 / 3; border-radius: var(--raio);
+  background: var(--tinta); box-shadow: var(--sombra); color: #fff;
+  transition: transform var(--transicao), box-shadow var(--transicao);
+}
+.esp__foto {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  transition: transform .7s cubic-bezier(.22, .61, .36, 1), filter var(--transicao);
+}
+.esp__veu {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(var(--tinta-rgb), .06) 30%, rgba(var(--tinta-rgb), .58) 62%, rgba(var(--tinta-rgb), .88) 100%);
+  transition: background var(--transicao);
+}
+.esp__texto { position: absolute; inset: auto 0 0 0; padding: 1.3rem 1.35rem; }
+.esp__nome {
+  display: block; font-family: var(--serifa); font-size: 1.3rem; font-weight: 600;
+  line-height: 1.15; color: #fff; text-shadow: 0 2px 12px rgba(0, 0, 0, .45);
+}
+.esp__seta {
+  display: block; font-size: .72rem; letter-spacing: .14em; text-transform: uppercase;
+  font-weight: 600; color: var(--rosa-suave); margin-top: .45rem;
+  opacity: 0; transform: translateY(8px);
+  transition: opacity var(--transicao), transform var(--transicao);
+}
+.esp:hover, .esp:focus-visible { transform: translateY(-8px); box-shadow: 0 20px 44px rgba(var(--tinta-rgb), .28); }
+.esp:hover .esp__foto, .esp:focus-visible .esp__foto { transform: scale(1.08); }
+.esp:hover .esp__veu, .esp:focus-visible .esp__veu {
+  background: linear-gradient(180deg, rgba(230, 53, 126, .12) 20%, rgba(160, 30, 82, .62) 60%, rgba(120, 20, 62, .92) 100%);
+}
+.esp:hover .esp__seta, .esp:focus-visible .esp__seta { opacity: 1; transform: none; }
+.esp:focus-visible { outline: 3px solid var(--rosa); outline-offset: 3px; }
+/* sem hover (toque): a chamada fica sempre visível */
+@media (hover: none) { .esp__seta { opacity: 1; transform: none; } }
+
+/* depoimentos */
+.depo { background: #fff; border: 1px solid var(--linha); border-radius: var(--raio); padding: 2rem 1.8rem; box-shadow: var(--sombra); transition: transform var(--transicao), box-shadow var(--transicao); display: flex; flex-direction: column; gap: 1rem; }
+/* <figure> nasce com margin 1em 40px do navegador: estreitava os cartões */
+.depo { position: relative; overflow: hidden; margin: 0; }
+.depo::after {
+  content: ''; position: absolute; left: 0; top: 0; width: 3px; height: 100%;
+  background: linear-gradient(180deg, var(--rosa), var(--rosa-suave));
+  transform: scaleY(0); transform-origin: 50% 0;
+  transition: transform .55s cubic-bezier(.18, .82, .26, 1);
+}
+.depo:hover { transform: translateY(-8px); box-shadow: var(--sombra-alta); }
+.depo:hover::after { transform: scaleY(1); }
+/* as estrelas acendem uma a uma quando o cartão é olhado */
+.depo__estrelas { transition: transform var(--transicao), letter-spacing var(--transicao); transform-origin: 0 50%; }
+.depo:hover .depo__estrelas { transform: scale(1.06); letter-spacing: .2em; }
+.depo__estrelas { color: var(--dourado); letter-spacing: .12em; font-size: 1rem; }
+.depo__texto { font-style: italic; color: var(--tinta-media); font-size: .97rem; margin: 0; }
+.depo__autor { margin-top: auto; font-size: .88rem; }
+.depo__autor strong { display: block; color: var(--rosa); font-weight: 600; font-style: normal; }
+.depo__autor span { color: var(--tinta-fraca); font-size: .8rem; }
+
+/* ---------- contato ---------- */
+.contato__grade { display: grid; grid-template-columns: 1.05fr .95fr; gap: clamp(2rem, 5vw, 4rem); }
+.formulario { background: #fff; border: 1px solid var(--linha); border-radius: var(--raio); padding: clamp(1.6rem, 3vw, 2.4rem); box-shadow: var(--sombra); }
+.campo { margin-bottom: 1.1rem; }
+.campo label { display: block; font-size: .78rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--tinta-fraca); margin-bottom: .45rem; }
+.campo input, .campo textarea {
+  width: 100%; padding: .85rem 1rem; font-family: var(--corpo); font-size: .95rem; color: var(--tinta);
+  background: var(--cinza-50); border: 1.5px solid var(--linha); border-radius: var(--raio-p);
+  transition: border-color var(--transicao), background-color var(--transicao);
+}
+.campo input:focus, .campo textarea:focus { outline: 0; border-color: var(--rosa); background: #fff; }
+.campo textarea { min-height: 104px; resize: vertical; }
+
+.infos { display: flex; flex-direction: column; gap: 1.5rem; }
+.info { display: flex; gap: 1rem; align-items: flex-start; }
+.info__icone { flex: 0 0 44px; width: 44px; height: 44px; border-radius: 50%; background: var(--cinza-100); color: var(--rosa); display: grid; place-items: center; }
+.info__icone svg { width: 20px; height: 20px; }
+.info strong { display: block; color: var(--tinta); font-family: var(--corpo); font-weight: 600; font-size: .95rem; margin-bottom: .15rem; }
+.info p { font-size: .93rem; margin: 0; }
+.mapa { border: 0; width: 100%; height: 260px; border-radius: var(--raio); box-shadow: var(--sombra); }
+
+/* ---------- rodapé ---------- */
+.rodape { background: var(--tinta); color: rgba(255, 255, 255, .72); padding: clamp(3rem, 6vw, 4.5rem) 0 1.5rem; font-size: .92rem; }
+.rodape__grade { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 2.5rem; margin-bottom: 2.5rem; }
+.rodape h4 { color: #fff; font-family: var(--corpo); font-size: .8rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 1.1rem; }
+.rodape img { width: 168px; margin-bottom: 1.2rem; filter: brightness(0) invert(1); }
+/* no rodapé a marca fica COLORIDA: sobre o fundo escuro o rosa da marca lê
+   melhor que o branco achatado — e, principalmente, `brightness(0) invert(1)`
+   no pai apagaria a ponta da caneta (tudo vira o mesmo branco). */
+.rodape__marca { display: block; width: 168px; margin-bottom: 1.2rem; }
+.rodape__marca:focus-visible { outline: 3px solid var(--rosa); outline-offset: 6px; border-radius: 4px; }
+.rodape a { color: rgba(255, 255, 255, .72); }
+.rodape a:hover { color: var(--rosa-suave); }
+.rodape ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .55rem; }
+.rodape__base { border-top: 1px solid rgba(255, 255, 255, .12); padding-top: 1.5rem; display: flex; flex-wrap: wrap; gap: .8rem 1.5rem; justify-content: space-between; font-size: .8rem; color: rgba(255, 255, 255, .5); }
+.rodape__sociais { display: flex; gap: .7rem; margin-top: 1.2rem; }
+.rodape__sociais a { width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, .1); display: grid; place-items: center; transition: var(--transicao); }
+.rodape__sociais a:hover { background: var(--rosa); transform: translateY(-3px); }
+.rodape__sociais svg { width: 18px; height: 18px; fill: #fff; }
+.rodape__cro { font-size: .82rem; color: rgba(255, 255, 255, .55); margin-top: 1rem; }
+
+/* ---------- whatsapp flutuante ---------- */
+.zap {
+  position: fixed; right: 1.3rem; bottom: 1.3rem; z-index: 80;
+  width: 58px; height: 58px; border-radius: 50%; background: #25D366;
+  display: grid; place-items: center; box-shadow: 0 10px 26px rgba(37, 211, 102, .42);
+  transition: transform var(--transicao), box-shadow var(--transicao);
+}
+.zap:hover { transform: scale(1.09); box-shadow: 0 14px 34px rgba(37, 211, 102, .55); }
+.zap svg { width: 30px; height: 30px; fill: #fff; }
+
+/* ---------- topo de página interna ---------- */
+/* nas internas o cabeçalho já nasce sólido: a capa desce para não ficar
+   com uma faixa branca por cima da foto */
+.corpo--topo-fixo .capa { margin-top: 76px; }
+.capa { position: relative; min-height: clamp(380px, 56vh, 520px); display: grid; align-items: center; overflow: hidden; }
+/* retratos: enquadrar acima do centro para não cortar o rosto */
+.capa__fundo { position: absolute; inset: 0; background-size: cover; background-position: center 28%; }
+.capa::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(95deg, rgba(20, 10, 15, .84) 0%, rgba(20, 10, 15, .66) 42%, rgba(20, 10, 15, .3) 78%, rgba(20, 10, 15, .12) 100%);
+}
+.capa__conteudo { position: relative; z-index: 2; padding: 7.5rem 0 3rem; max-width: 660px; }
+.capa h1 { color: #fff; margin-bottom: 1.1rem; }
+.capa__sub { color: #EEEFF1; font-weight: 400; font-size: 1.04rem; margin-bottom: 2rem; }
+.capa .selo { color: var(--rosa-suave); }
+
+.migalhas { font-size: .8rem; color: var(--tinta-fraca); margin-bottom: 2.4rem; }
+.migalhas a { color: var(--tinta-fraca); }
+.migalhas a:hover { color: var(--rosa); }
+
+/* 2 colunas: as páginas têm 1–4 procedimentos e textos longos.
+   Com 3 colunas, 4 itens viram 3+1 órfão e a leitura fica estreita. */
+.proc { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 1.6rem; }
+.proc:has(> :only-child) { max-width: 720px; }
+.proc__item {
+  position: relative; overflow: hidden;
+  background: #fff; border: 1px solid var(--linha); border-radius: var(--raio);
+  padding: 2rem 1.8rem; box-shadow: var(--sombra);
+  transition: transform var(--transicao), box-shadow .5s cubic-bezier(.16, .84, .32, 1) .04s,
+              border-color var(--transicao);
+}
+.proc__item::after {
+  content: ''; position: absolute; left: 0; top: 0; height: 3px; width: 100%;
+  background: linear-gradient(90deg, var(--rosa), var(--rosa-suave));
+  transform: scaleX(0); transform-origin: 0 50%;
+  transition: transform .55s cubic-bezier(.18, .82, .26, 1);
+}
+.proc__item:hover { transform: translateY(-8px); box-shadow: var(--sombra-alta); border-color: rgba(230, 53, 126, .38); }
+.proc__item:hover::after { transform: scaleX(1); }
+.proc__item h3 { color: var(--rosa); font-size: 1.22rem; transition: transform var(--transicao); transform-origin: 0 50%; }
+.proc__item:hover h3 { transform: translateX(3px); }
+.proc__item p { font-size: .95rem; }
+
+.cta-final { background: linear-gradient(120deg, #D2306F 0%, #A8285F 100%); color: #fff; border-radius: calc(var(--raio) + 6px); padding: clamp(2.2rem, 5vw, 3.6rem); text-align: center; }
+.cta-final h2 { color: #fff; }
+.cta-final p { color: rgba(255, 255, 255, .88); max-width: 44em; margin-inline: auto; margin-bottom: 1.8rem; }
+.cta-final .btn--claro:hover { background: #fff; color: var(--rosa); }
+
+/* ---------- blog ---------- */
+.capa--curta { min-height: clamp(300px, 44vh, 420px); }
+.posts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 1.7rem; }
+.post {
+  display: flex; flex-direction: column; overflow: hidden;
+  background: #fff; border: 1px solid var(--linha); border-radius: var(--raio);
+  box-shadow: var(--sombra); color: var(--tinta);
+  transition: transform var(--transicao), box-shadow var(--transicao), border-color var(--transicao);
+}
+.post__foto { display: block; aspect-ratio: 16 / 10; overflow: hidden; }
+.post__foto img { width: 100%; height: 100%; object-fit: cover; transition: transform .7s cubic-bezier(.22, .61, .36, 1); }
+.post__corpo { display: flex; flex-direction: column; gap: .5rem; padding: 1.5rem 1.4rem 1.7rem; flex: 1; }
+.post__meta { font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; color: var(--rosa); font-weight: 600; }
+.post__titulo { font-family: var(--serifa); font-size: 1.24rem; font-weight: 600; line-height: 1.25; color: var(--tinta); }
+.post__resumo { font-size: .92rem; color: var(--tinta-media); line-height: 1.6; }
+.post__leia { margin-top: auto; padding-top: .7rem; font-size: .78rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--rosa); }
+.post:hover { transform: translateY(-8px); box-shadow: var(--sombra-alta); border-color: rgba(230, 53, 126, .38); }
+.post:hover .post__foto img { transform: scale(1.07); }
+.post__titulo { transition: color var(--transicao); }
+.post:hover .post__titulo { color: var(--rosa); }
+.post__leia { position: relative; display: inline-block; }
+.post__leia::after {
+  content: ''; position: absolute; left: 0; bottom: -3px; width: 100%; height: 2px;
+  background: var(--rosa); transform: scaleX(0); transform-origin: 0 50%;
+  transition: transform .45s cubic-bezier(.18, .82, .26, 1);
+}
+.post:hover .post__leia::after { transform: scaleX(1); }
+.post:focus-visible { outline: 3px solid var(--rosa); outline-offset: 3px; }
+
+/* corpo do artigo — medida de leitura curta, títulos com respiro */
+.artigo { max-width: 46em; margin-inline: auto; font-size: 1.05rem; }
+.artigo h2 { font-size: clamp(1.4rem, 2.6vw, 1.85rem); margin-top: 2.4rem; }
+.artigo h3 { margin-top: 1.8rem; }
+.artigo ul, .artigo ol { padding-left: 1.3rem; margin: 0 0 1.15em; }
+.artigo li { margin-bottom: .5rem; }
+.artigo strong { color: var(--tinta); font-weight: 600; }
+.artigo hr { border: 0; border-top: 1px solid var(--linha); margin: 2.4rem 0; }
+.artigo__cta { max-width: 46em; margin: 3rem auto 0; display: flex; flex-wrap: wrap; gap: .9rem; justify-content: center; }
+
+/* outras especialidades (rodapé das internas) */
+.outras { display: flex; flex-wrap: wrap; gap: .7rem; }
+.outras a {
+  padding: .6rem 1.15rem; border-radius: 999px; background: #fff; border: 1px solid var(--linha);
+  font-size: .82rem; font-weight: 600; color: var(--tinta); letter-spacing: .04em;
+  transition: var(--transicao);
+}
+.outras a:hover { background: var(--rosa); border-color: var(--rosa); color: #fff; transform: translateY(-3px); }
+
+/* ---------- movimento ---------- */
+.rev { opacity: 0; transform: translateY(30px); transition: opacity .9s ease, transform 1s cubic-bezier(.16, .84, .32, 1); }
+.rev.vis { opacity: 1; transform: none; }
+
+/* cascata de grade: --n é o índice do cartão. 55ms por item mantém a fila
+   inteira sob ~400ms — acima disso o último cartão parece atrasado, não
+   coreografado. O leve `scale` dá profundidade sem overshoot (Premium). */
+.rev--carta { transform: translateY(34px) scale(.972); transform-origin: 50% 100%; }
+.rev--carta.vis { transform: none; }
+.rev--carta { transition-delay: min(calc(var(--n, 0) * 55ms), 385ms); }
+/* o conteúdo entra logo atrás do cartão: camada secundária.
+   Só nos cartões de TEXTO — em `.esp` e `.post` a foto é o próprio cartão, e
+   escondê-la deixaria um retângulo vazio entrando na tela. */
+.cartao.rev--carta > *, .depo.rev--carta > *, .proc__item.rev--carta > * {
+  opacity: 0; transform: translateY(9px);
+  transition: opacity .6s ease, transform .6s cubic-bezier(.16, .84, .32, 1);
+}
+.cartao.rev--carta.vis > *, .depo.rev--carta.vis > *, .proc__item.rev--carta.vis > * {
+  opacity: 1; transform: none;
+  transition-delay: calc(min(calc(var(--n, 0) * 55ms), 385ms) + 140ms);
+}
+/* variantes: entradas diferentes evitam a página inteira subindo igual */
+.rev--esq { transform: translateX(-34px); }
+.rev--dir { transform: translateX(34px); }
+.rev--zoom { transform: scale(.94); }
+.rev--esq.vis, .rev--dir.vis, .rev--zoom.vis { transform: none; }
+
+/* ---------- títulos que se escrevem ----------
+   O logo é cursivo, então lá o wipe da esquerda p/ a direita LÊ como escrita.
+   Playfair é serifa de imprensa: o mesmo wipe cortaria cada letra ao meio e
+   viraria cortina. O equivalente honesto é revelar PALAVRA A PALAVRA, com a
+   mesma direção e a mesma curva — e fechar com a rubrica da marca. */
+/* BLOCK, não inline: como span inline o elemento gera uma caixa por linha —
+   a rubrica media 22% da largura do TEXTO (encolhendo em título curto) e
+   ancorava na primeira caixa de linha, saindo fora de lugar. */
+.escreve { display: block; }
+.escreve .pal { display: inline-block; overflow: hidden; vertical-align: bottom; }
+/* o estado escondido só existe com JS: sem ele o título nasce pronto em vez
+   de sumir para sempre esperando uma classe que nunca chega */
+.js .escreve .pal > span {
+  display: inline-block; transform: translateY(112%);
+  transition: transform .92s cubic-bezier(.16, .84, .32, 1);
+  /* teto no atraso: título longo não pode arrastar a cascata além de ~450ms */
+  transition-delay: min(calc(var(--i, 0) * 62ms), 450ms);
+}
+.escreve .pal > span { display: inline-block; }
+.escreve.vis .pal > span { transform: none; }
+
+/* a rubrica da marca, repetida sob o título — mesmo gesto rápido do logo */
+.escreve--rubrica { position: relative; padding-bottom: .28em; }
+/* medida em `em`: a rubrica acompanha o tamanho do título em vez de depender
+   da largura do texto, então fica igual em todas as seções */
+.escreve--rubrica::after {
+  content: ''; position: absolute; left: 0; bottom: .04em;
+  width: 2.6em; height: .075em; min-height: 3px; border-radius: 3px;
+  background: linear-gradient(90deg, var(--rosa), var(--rosa-suave));
+  transform-origin: 0 50%;
+  transition: transform .62s cubic-bezier(.18, .82, .26, 1);
+  transition-delay: .58s;
+}
+/* O gatilho é sempre a classe `vis` NO PRÓPRIO `.escreve` — o observer marca
+   `.escreve` diretamente. Depender do ancestral criava um seletor que nunca
+   casava (`.vis .secao__cabeca--centro` exige ancestral, mas `.vis` cai no
+   MESMO elemento que `--centro`). */
+.js .escreve--rubrica::after { transform: scaleX(0); }
+.escreve--rubrica.vis::after { transform: scaleX(1); }
+
+.secao__cabeca--centro .escreve--rubrica::after { left: 50%; transform-origin: 50% 50%; transform: translateX(-50%); }
+.js .secao__cabeca--centro .escreve--rubrica::after { transform: translateX(-50%) scaleX(0); }
+.secao__cabeca--centro .escreve--rubrica.vis::after { transform: translateX(-50%) scaleX(1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .escreve .pal > span { transform: none; transition: none; }
+  .escreve--rubrica::after { transform: scaleX(1); transition: none; }
+  .secao__cabeca--centro .escreve--rubrica::after { transform: translateX(-50%) scaleX(1); }
+}
+
+/* brilho que atravessa o botão no hover */
+.btn { position: relative; overflow: hidden; }
+.btn::before {
+  content: ''; position: absolute; top: 0; left: -140%; width: 55%; height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .42), transparent);
+  transform: skewX(-18deg); transition: left .75s cubic-bezier(.22, .61, .36, 1);
+}
+.btn:hover::before { left: 150%; }
+.btn > * { position: relative; z-index: 1; }
+
+/* seta do CTA que avança no hover */
+.btn--principal::after {
+  content: '→'; font-size: 1.05em; line-height: 1;
+  transition: transform var(--transicao); position: relative; z-index: 1;
+}
+.btn--principal:hover::after { transform: translateX(5px); }
+
+/* pulso do botão de WhatsApp */
+.zap::after {
+  content: ''; position: absolute; inset: 0; border-radius: 50%;
+  border: 2px solid rgba(37, 211, 102, .55); animation: pulsar 2.6s ease-out infinite;
+}
+@keyframes pulsar {
+  0% { transform: scale(1); opacity: .8; }
+  70% { transform: scale(1.55); opacity: 0; }
+  100% { transform: scale(1.55); opacity: 0; }
+}
+
+/* faixa deslizante das especialidades
+   ⚠ NADA de mask-image aqui: na faixa ela comeria o próprio fundo escuro
+   (pontas esbranquiçadas) e no trilho seria relativa à largura dele, que é o
+   dobro da tela. O certo é desvanecer PARA a cor do fundo, com dois véus. */
+.faixa { overflow: hidden; padding: 1.05rem 0; background: var(--tinta); position: relative; }
+.faixa::before, .faixa::after {
+  content: ''; position: absolute; top: 0; bottom: 0; z-index: 2;
+  width: clamp(48px, 10vw, 150px); pointer-events: none;
+}
+.faixa::before { left: 0; background: linear-gradient(90deg, var(--tinta) 12%, rgba(var(--tinta-rgb), 0)); }
+.faixa::after { right: 0; background: linear-gradient(270deg, var(--tinta) 12%, rgba(var(--tinta-rgb), 0)); }
+.faixa__trilho { display: flex; width: max-content; animation: correr 46s linear infinite; }
+.faixa:hover .faixa__trilho { animation-play-state: paused; }
+.faixa__item {
+  display: inline-flex; align-items: center; gap: .9rem; padding: 0 1.5rem;
+  font-family: var(--serifa); font-size: 1.08rem; color: rgba(255, 255, 255, .82);
+  white-space: nowrap;
+}
+.faixa__item::after { content: '◆'; font-size: .5rem; color: var(--rosa); }
+@keyframes correr { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+/* barra de progresso de leitura (artigos) */
+.progresso {
+  position: fixed; top: 0; left: 0; height: 3px; width: 100%; z-index: 99;
+  transform: scaleX(0); transform-origin: 0 50%;
+  background: linear-gradient(90deg, var(--rosa), var(--rosa-suave));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rev, .rev--esq, .rev--dir, .rev--zoom, .rev--carta { opacity: 1; transform: none; transition: none; }
+  .cartao.rev--carta > *, .depo.rev--carta > *, .proc__item.rev--carta > * {
+    opacity: 1; transform: none; transition: none;
+  }
+  .cartao::after, .depo::after, .proc__item::after, .post__leia::after { transition: none; }
+  .linha > span { transform: none; }
+  .hero__fundo { transition: opacity .01s; transform: none; }
+  .mancha, .faixa__trilho, .zap::after { animation: none; }
+  * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+/* ---------- responsivo ---------- */
+@media (max-width: 900px) {
+  .duo, .contato__grade { grid-template-columns: 1fr; }
+  .duo--invertido .duo__midia { order: 0; }
+  .rodape__grade { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 780px) {
+  .hamburger { display: flex; }
+  .menu {
+    position: fixed; inset: 0 0 0 auto; width: min(84vw, 340px);
+    flex-direction: column; align-items: flex-start; justify-content: center; gap: 1.6rem;
+    padding: 2.5rem; background: #fff; box-shadow: -10px 0 40px rgba(var(--tinta-rgb), .18);
+    transform: translateX(100%); transition: transform var(--transicao); z-index: 95;
+  }
+  .topo--aberto .menu { transform: none; }
+  .menu a { color: var(--tinta); font-size: .95rem; }
+  .menu .btn { width: 100%; justify-content: center; }
+  .hamburger { position: relative; z-index: 96; }
+  .hero__conteudo { padding-top: 7rem; }
+  /* no celular o texto cobre a largura toda: o scrim precisa ser mais forte
+     que no desktop, senão o logo pintado na fachada atravessa o subtítulo */
+  .hero::after { background: linear-gradient(180deg, rgba(18, 9, 13, .82) 0%, rgba(18, 9, 13, .74) 55%, rgba(18, 9, 13, .86) 100%); }
+  .hero__sub { font-size: .98rem; }
+  .capa::after { background: linear-gradient(180deg, rgba(20, 10, 15, .74) 0%, rgba(20, 10, 15, .66) 100%); }
+}
+@media (max-width: 560px) {
+  body { font-size: 16px; }
+  .rodape__grade { grid-template-columns: 1fr; }
+  .confianca__grade { grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .hero__acoes .btn { width: 100%; justify-content: center; }
+}
+
+
+/* ============================================================
+   DESTAQUE — atendimento bem avaliado + especialidades (set/2026)
+   ============================================================ */
+.destaque { display: grid; grid-template-columns: minmax(250px, 340px) 1fr; gap: clamp(2rem, 5vw, 4.5rem); align-items: center; }
+.nota {
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: .35rem;
+  padding: clamp(2rem, 4vw, 2.8rem) 1.6rem; border-radius: calc(var(--raio) + 6px);
+  background: var(--tinta); color: #fff; box-shadow: var(--sombra-alta);
+  transition: transform var(--transicao), box-shadow var(--transicao);
+}
+.nota:hover { color: #fff; transform: translateY(-6px); box-shadow: 0 26px 54px rgba(var(--tinta-rgb), .28); }
+.nota__valor { font-family: var(--serifa); font-size: clamp(4.2rem, 9vw, 5.6rem); font-weight: 600; line-height: 1; }
+.nota__estrelas { color: var(--dourado); font-size: 1.35rem; letter-spacing: .18em; }
+.nota__total { font-size: .95rem; color: rgba(255, 255, 255, .78); margin-top: .4rem; }
+.nota__total strong { color: #fff; font-weight: 600; }
+.nota__link {
+  margin-top: 1rem; font-size: .74rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--rosa-suave); transition: transform var(--transicao);
+}
+.nota:hover .nota__link { transform: translateX(4px); }
+.nota:focus-visible { outline: 3px solid var(--rosa); outline-offset: 4px; }
+.chips { list-style: none; padding: 0; margin: 1.6rem 0 0; display: flex; flex-wrap: wrap; gap: .5rem; }
+.chips li {
+  padding: .42rem .95rem; border-radius: 999px; background: var(--cinza-100); border: 1px solid var(--linha);
+  font-size: .8rem; font-weight: 500; color: var(--tinta);
+}
+.destaque__depos { margin-top: clamp(2.6rem, 5vw, 3.6rem); }
+@media (max-width: 780px) {
+  .destaque { grid-template-columns: 1fr; }
+  .nota { max-width: 420px; width: 100%; margin-inline: auto; }
+}
+
+/* ============================================================
+   PROJETO DESPERTAR — a ÚNICA área toda rosa do site
+   (faixa na home + página própria com .tema-despertar no body)
+   ============================================================ */
+.secao--despertar {
+  background:
+    radial-gradient(900px 520px at 88% -10%, rgba(255, 255, 255, .16), transparent 60%),
+    linear-gradient(135deg, #D2306F 0%, #B82A63 55%, #9A2257 100%);
+  color: rgba(255, 255, 255, .9);
+}
+.secao--despertar h2 { color: #fff; }
+.secao--despertar .selo { color: #FFD3E4; }
+.secao--despertar .mancha--a { background: radial-gradient(circle, rgba(255, 255, 255, .22), rgba(255, 255, 255, 0) 68%); }
+.secao--despertar .mancha--b { background: radial-gradient(circle, rgba(255, 150, 196, .45), rgba(255, 150, 196, 0) 68%); }
+.despertar-chamada { grid-template-columns: minmax(160px, 260px) 1fr; }
+.despertar-logo { width: 100%; max-width: 240px; margin-inline: auto; filter: drop-shadow(0 12px 28px rgba(80, 10, 40, .3)); }
+.secao--despertar .btn--claro:hover, .capa--despertar .btn--claro:hover { color: var(--rosa-escuro); }
+
+/* a página inteira: leitos, trama, manchas e rodapé em rosa */
+.tema-despertar { --tinta: #3A0F24; --tinta-rgb: 58, 15, 36; --tinta-media: #5C3446; --tinta-fraca: #8C6474; --linha: #F2D7E3; }
+.tema-despertar .secao--leve { background: linear-gradient(180deg, #FFF6FA 0%, #FDEEF4 100%); }
+.tema-despertar .secao--nevoa {
+  background:
+    radial-gradient(1200px 620px at 12% -8%, rgba(230, 53, 126, .14), transparent 62%),
+    linear-gradient(168deg, #FDEEF4 0%, #FBE2ED 100%);
+}
+.tema-despertar .secao--clara {
+  background:
+    radial-gradient(820px 480px at 88% -12%, rgba(255, 255, 255, .7), transparent 58%),
+    linear-gradient(150deg, #F9D5E4 0%, #F6C4D9 100%);
+}
+.tema-despertar .secao--trama::before { background-image: radial-gradient(rgba(230, 53, 126, .2) 1px, transparent 1px); }
+.tema-despertar .mancha--a { background: radial-gradient(circle, rgba(230, 53, 126, .38), rgba(230, 53, 126, 0) 68%); }
+.tema-despertar .mancha--b { background: radial-gradient(circle, rgba(244, 169, 200, .6), rgba(244, 169, 200, 0) 68%); }
+.tema-despertar .mancha--c { background: radial-gradient(circle, rgba(255, 255, 255, .7), rgba(255, 255, 255, 0) 66%); }
+.tema-despertar .rodape { background: #3A0F24; }
+.tema-despertar .formulario input, .tema-despertar .formulario textarea { background: #FFF6FA; }
+.tema-despertar .info__icone, .tema-despertar .chips li { background: #FDEEF4; }
+.tema-despertar .cartao { border-color: #F2D7E3; }
+
+.capa--despertar {
+  min-height: clamp(460px, 70vh, 640px);
+  background:
+    radial-gradient(760px 480px at 82% 0%, rgba(255, 255, 255, .18), transparent 62%),
+    linear-gradient(135deg, #D2306F 0%, #B82A63 50%, #8E1F50 100%);
+  isolation: isolate;
+}
+.capa--despertar::after { display: none; }
+.capa--despertar .mancha { opacity: .6; }
+.capa--despertar .mancha--a { background: radial-gradient(circle, rgba(255, 255, 255, .24), rgba(255, 255, 255, 0) 68%); }
+.capa--despertar .mancha--b { background: radial-gradient(circle, rgba(255, 150, 196, .5), rgba(255, 150, 196, 0) 68%); }
+.capa--despertar .selo { color: #FFD3E4; }
+.capa--despertar .capa__sub { color: rgba(255, 255, 255, .92); font-size: 1.12rem; margin-bottom: 0; }
+.capa__conteudo--despertar { max-width: var(--largura); display: grid; grid-template-columns: minmax(140px, 250px) 1fr; gap: clamp(1.6rem, 4vw, 3.6rem); align-items: center; }
+.capa__logo-despertar { width: 100%; max-width: 250px; filter: drop-shadow(0 14px 30px rgba(70, 8, 36, .35)); }
+.aviso-previa {
+  display: table; margin: 0 0 1.1rem; padding: .35rem .85rem; border-radius: 999px;
+  background: rgba(255, 255, 255, .16); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .4);
+  color: #fff; font-size: .72rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+}
+.nr1 {
+  background: #fff; border: 1px solid #F2D7E3; border-left: 4px solid var(--rosa);
+  border-radius: var(--raio); padding: clamp(1.6rem, 3vw, 2.3rem); box-shadow: var(--sombra);
+}
+.nr1__rotulo { display: block; font-family: var(--serifa); font-size: 1.35rem; font-weight: 600; color: var(--tinta); margin-bottom: .7rem; }
+.nr1__fecho { color: var(--rosa-escuro); font-weight: 500; }
+.cartao__icone {
+  display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%;
+  background: #FDEEF4; color: var(--rosa); margin-bottom: 1.1rem;
+}
+.cartao__icone svg { width: 26px; height: 26px; }
+.despertar-selo { width: 100%; max-width: 330px; margin-inline: auto; box-shadow: none !important; border-radius: 0 !important; }
+.cta-final__assinatura { font-family: var(--serifa); font-style: italic; font-size: 1.2rem; color: #fff !important; }
+@media (max-width: 780px) {
+  .despertar-chamada, .capa__conteudo--despertar { grid-template-columns: 1fr; text-align: center; }
+  .despertar-logo, .capa__logo-despertar { max-width: 150px; margin-inline: auto; }
+  .aviso-previa { margin-inline: auto; }
+  .capa__conteudo--despertar { padding-top: 6.5rem; }
+}
