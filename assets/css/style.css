@@ -32,6 +32,7 @@
   --sombra: 0 4px 18px rgba(var(--tinta-rgb), .07);
   --sombra-alta: 0 18px 44px rgba(var(--tinta-rgb), .16);
   /* curvas: saída rápida e chegada longa = movimento que parece ter peso */
+  --curva: cubic-bezier(.16, .84, .32, 1);
   --transicao: .42s cubic-bezier(.16, .84, .32, 1);
   --transicao-longa: .78s cubic-bezier(.16, .84, .32, 1);
 }
@@ -173,11 +174,11 @@ a:hover { color: var(--rosa-escuro); }
               background-color var(--transicao), color var(--transicao);
 }
 .btn--principal { background: var(--rosa); color: #fff; box-shadow: 0 8px 22px rgba(230, 53, 126, .28); }
-.btn--principal:hover { background: var(--rosa-escuro); color: #fff; transform: translateY(-3px); box-shadow: 0 14px 30px rgba(230, 53, 126, .36); }
+.btn--principal:hover { background: var(--rosa-escuro); color: #fff; transform: scale(1.03); box-shadow: 0 14px 30px rgba(230, 53, 126, .36); }
 .btn--contorno { background: transparent; color: var(--tinta); box-shadow: inset 0 0 0 1.5px var(--linha); }
-.btn--contorno:hover { color: var(--rosa); box-shadow: inset 0 0 0 1.5px var(--rosa); transform: translateY(-3px); }
+.btn--contorno:hover { color: var(--rosa); box-shadow: inset 0 0 0 1.5px var(--rosa); transform: scale(1.03); }
 .btn--claro { background: rgba(255, 255, 255, .12); color: #fff; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .55); backdrop-filter: blur(4px); }
-.btn--claro:hover { background: #fff; color: var(--tinta); transform: translateY(-3px); }
+.btn--claro:hover { background: #fff; color: var(--tinta); transform: scale(1.03); }
 
 /* ---------- cabeçalho ---------- */
 .topo {
@@ -189,7 +190,13 @@ a:hover { color: var(--rosa-escuro); }
 .topo__logo { display: block; width: clamp(140px, 16vw, 178px); }
 .topo:not(.topo--fixo) .topo__logo .marca { filter: brightness(0) invert(1); }
 .topo__logo .marca { transition: filter var(--transicao); }
-.topo--fixo { background: rgba(255, 255, 255, .96); box-shadow: 0 2px 20px rgba(var(--tinta-rgb), .09); padding: .65rem 0; backdrop-filter: blur(10px); }
+.topo::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; opacity: 0; pointer-events: none;
+  background: rgba(255, 255, 255, .96); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  box-shadow: 0 2px 20px rgba(var(--tinta-rgb), .09); transition: opacity var(--transicao);
+}
+.topo--fixo { padding: .65rem 0; }
+.topo--fixo::before { opacity: 1; }
 
 .menu { display: flex; align-items: center; gap: clamp(1rem, 2.4vw, 2rem); }
 .menu a {
@@ -199,10 +206,11 @@ a:hover { color: var(--rosa-escuro); }
 }
 .topo--fixo .menu a { color: var(--tinta); }
 .menu a::after {
-  content: ''; position: absolute; left: 0; bottom: 0; height: 2px; width: 0;
-  background: var(--rosa); transition: width var(--transicao);
+  content: ''; position: absolute; left: 0; bottom: 0; height: 2px; width: 100%;
+  background: var(--rosa); transform: scaleX(0); transform-origin: 100% 50%;
+  transition: transform var(--transicao);
 }
-.menu a:hover::after, .menu a[aria-current="page"]::after { width: 100%; }
+.menu a:hover::after, .menu a:focus-visible::after, .menu a[aria-current]::after { transform: scaleX(1); transform-origin: 0 50%; }
 .menu a:hover { color: var(--rosa); }
 .menu .btn { padding: .7rem 1.4rem; font-size: .78rem; letter-spacing: .1em; text-transform: uppercase; }
 .menu .btn::after { display: none; }
@@ -304,16 +312,16 @@ a:hover { color: var(--rosa-escuro); }
    1. a palavra é escrita com cuidado (2s)
    2. a rubrica cruza por baixo num golpe só, ainda com a palavra terminando
    3. o subtítulo assenta por último, quando a mão já saiu */
-.marca:hover, .topo__logo:focus-visible .marca, .rodape__marca:focus-visible .marca {
+.topo__logo:hover .marca, .rodape__marca:hover .marca, .topo__logo:focus-visible .marca, .rodape__marca:focus-visible .marca {
   animation: preparar 2.25s cubic-bezier(.22, .7, .25, 1) both;
 }
-.marca:hover .marca__cam--assinatura,
+.topo__logo:hover .marca .marca__cam--assinatura, .rodape__marca:hover .marca .marca__cam--assinatura,
 .topo__logo:focus-visible .marca .marca__cam--assinatura,
 .rodape__marca:focus-visible .marca .marca__cam--assinatura {
   animation-name: escrever; animation-duration: 2.05s;
   animation-delay: .06s; animation-fill-mode: both;
 }
-.marca:hover .marca__cam--ponta,
+.topo__logo:hover .marca .marca__cam--ponta, .rodape__marca:hover .marca .marca__cam--ponta,
 .topo__logo:focus-visible .marca .marca__cam--ponta,
 .rodape__marca:focus-visible .marca .marca__cam--ponta {
   animation-name: escrever, acender;
@@ -323,21 +331,21 @@ a:hover { color: var(--rosa-escuro); }
 }
 /* a rubrica é um gesto rápido: 3x mais veloz que a palavra, e entra por cima
    do fim dela (sobreposição = gesto contínuo; fila = animação de slide) */
-.marca:hover .marca__cam--risco,
+.topo__logo:hover .marca .marca__cam--risco, .rodape__marca:hover .marca .marca__cam--risco,
 .topo__logo:focus-visible .marca .marca__cam--risco,
 .rodape__marca:focus-visible .marca .marca__cam--risco {
   animation: rubricar .62s cubic-bezier(.18, .82, .26, 1) 1.62s both;
 }
 /* entra ainda com a rubrica terminando: fila cria buraco, sobreposição
    mantém o gesto contínuo */
-.marca:hover .marca__cam--subtitulo,
+.topo__logo:hover .marca .marca__cam--subtitulo, .rodape__marca:hover .marca .marca__cam--subtitulo,
 .topo__logo:focus-visible .marca .marca__cam--subtitulo,
 .rodape__marca:focus-visible .marca .marca__cam--subtitulo {
   animation: assentar .6s cubic-bezier(.4, 0, .2, 1) 2.02s both;
 }
 @media (prefers-reduced-motion: reduce) {
-  .marca:hover, .topo__logo:focus-visible .marca, .rodape__marca:focus-visible .marca,
-  .marca:hover .marca__cam, .topo__logo:focus-visible .marca .marca__cam,
+  .topo__logo:hover .marca, .rodape__marca:hover .marca, .topo__logo:focus-visible .marca, .rodape__marca:focus-visible .marca,
+  .topo__logo:hover .marca .marca__cam, .rodape__marca:hover .marca .marca__cam, .topo__logo:focus-visible .marca .marca__cam,
   .rodape__marca:focus-visible .marca .marca__cam { animation: none; }
   .marca__cam--ponta { display: none; }
 }
@@ -346,8 +354,7 @@ a:hover { color: var(--rosa-escuro); }
 .hero { position: relative; min-height: clamp(560px, 92vh, 820px); display: grid; align-items: center; overflow: hidden; }
 .hero__fundos { position: absolute; inset: 0; }
 .hero__fundo {
-  position: absolute; inset: 0; opacity: 0;
-  background-size: cover; background-position: center;
+  position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; object-fit: cover;
   transition: opacity 2s cubic-bezier(.4, 0, .2, 1), transform 12s linear;
   transform: scale(1.08);
 }
@@ -369,8 +376,14 @@ a:hover { color: var(--rosa-escuro); }
 .hero__sub { color: #EEEFF1; font-size: 1.06rem; font-weight: 400; margin-bottom: 2.2rem; max-width: 30em; }
 .hero__acoes { display: flex; flex-wrap: wrap; gap: .9rem; }
 .hero__pontos { position: absolute; left: 50%; transform: translateX(-50%); bottom: 2rem; z-index: 3; display: flex; gap: .55rem; }
-.hero__ponto { width: 30px; height: 3px; border: 0; padding: 0; border-radius: 2px; background: rgba(255, 255, 255, .4); cursor: pointer; transition: var(--transicao); }
-.hero__ponto.ativo { background: var(--rosa); width: 46px; }
+/* alvo de 46x27 (WCAG 2.5.8); o traço continua fino e o ativo preenche em scaleX */
+.hero__ponto { position: relative; width: 46px; height: 27px; border: 0; padding: 0; background: none; cursor: pointer; }
+.hero__ponto::before, .hero__ponto::after { content: ''; position: absolute; left: 0; right: 0; top: 12px; height: 3px; border-radius: 2px; }
+.hero__ponto::before { background: rgba(255, 255, 255, .4); transform: scaleX(.65); transition: transform var(--transicao); }
+.hero__ponto::after { background: var(--rosa); transform: scaleX(0); transform-origin: 0 50%; transition: transform var(--transicao); }
+.hero__ponto.ativo::after, .hero__ponto[aria-current="true"]::after { transform: none; }
+.hero__ponto.ativo::before { transform: none; }
+@media (hover: hover) { .hero__ponto:hover::before { transform: none; background: rgba(255, 255, 255, .7); } }
 
 /* ---------- faixa de confiança ---------- */
 .confianca { background: var(--tinta); color: #fff; padding: 1.7rem 0; }
@@ -467,10 +480,10 @@ a:hover { color: var(--rosa-escuro); }
   transform: scaleX(0); transform-origin: 0 50%;
   transition: transform .5s cubic-bezier(.18, .82, .26, 1);
 }
-.cartao:hover { transform: translateY(-8px); box-shadow: var(--sombra-alta); border-color: rgba(230, 53, 126, .38); }
+.cartao:hover { box-shadow: var(--sombra-alta); border-color: rgba(230, 53, 126, .38); }
 .cartao:hover::after { transform: scaleX(1); }
 .cartao h3 { margin-bottom: .6rem; transition: color var(--transicao); }
-.cartao:hover h3 { color: var(--rosa); }
+
 .cartao p { font-size: .95rem; }
 .cartao__num {
   font-family: var(--serifa); font-size: 1.6rem; color: var(--rosa);
@@ -480,7 +493,8 @@ a:hover { color: var(--rosa-escuro); }
 .cartao:hover .cartao__num { transform: translateX(4px); opacity: .55; }
 
 /* toque: sem hover, o dedo precisa de resposta na hora */
-.cartao:active, .esp:active, .depo:active, .proc__item:active, .post:active { transform: translateY(-2px) scale(.995); }
+/* toque: sem hover, o dedo recebe resposta na hora (só nos que são link) */
+.esp:active, .post:active, .nota:active { transform: scale(.985); transition-duration: .12s; }
 
 /* especialidades — cartão fotográfico */
 .esp {
@@ -496,7 +510,6 @@ a:hover { color: var(--rosa-escuro); }
 .esp__veu {
   position: absolute; inset: 0;
   background: linear-gradient(180deg, rgba(var(--tinta-rgb), .06) 30%, rgba(var(--tinta-rgb), .58) 62%, rgba(var(--tinta-rgb), .88) 100%);
-  transition: background var(--transicao);
 }
 .esp__texto { position: absolute; inset: auto 0 0 0; padding: 1.3rem 1.35rem; }
 .esp__nome {
@@ -509,11 +522,15 @@ a:hover { color: var(--rosa-escuro); }
   opacity: 0; transform: translateY(8px);
   transition: opacity var(--transicao), transform var(--transicao);
 }
-.esp:hover, .esp:focus-visible { transform: translateY(-8px); box-shadow: 0 20px 44px rgba(var(--tinta-rgb), .28); }
+@media (hover: hover) { .esp:hover { transform: scale(1.02); box-shadow: 0 20px 44px rgba(var(--tinta-rgb), .28); } }
+.esp:focus-visible { transform: scale(1.02); box-shadow: 0 20px 44px rgba(var(--tinta-rgb), .28); }
 .esp:hover .esp__foto, .esp:focus-visible .esp__foto { transform: scale(1.08); }
-.esp:hover .esp__veu, .esp:focus-visible .esp__veu {
+/* gradiente não interpola: o véu rosa é uma CAMADA que acende por opacity */
+.esp__veu::after {
+  content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity var(--transicao);
   background: linear-gradient(180deg, rgba(230, 53, 126, .12) 20%, rgba(160, 30, 82, .62) 60%, rgba(120, 20, 62, .92) 100%);
 }
+.esp:hover .esp__veu::after, .esp:focus-visible .esp__veu::after { opacity: 1; }
 .esp:hover .esp__seta, .esp:focus-visible .esp__seta { opacity: 1; transform: none; }
 .esp:focus-visible { outline: 3px solid var(--rosa); outline-offset: 3px; }
 /* sem hover (toque): a chamada fica sempre visível */
@@ -529,11 +546,11 @@ a:hover { color: var(--rosa-escuro); }
   transform: scaleY(0); transform-origin: 50% 0;
   transition: transform .55s cubic-bezier(.18, .82, .26, 1);
 }
-.depo:hover { transform: translateY(-8px); box-shadow: var(--sombra-alta); }
+.depo:hover { box-shadow: var(--sombra-alta); }
 .depo:hover::after { transform: scaleY(1); }
 /* as estrelas acendem uma a uma quando o cartão é olhado */
-.depo__estrelas { transition: transform var(--transicao), letter-spacing var(--transicao); transform-origin: 0 50%; }
-.depo:hover .depo__estrelas { transform: scale(1.06); letter-spacing: .2em; }
+.depo__estrelas { transition: transform var(--transicao); transform-origin: 0 50%; }
+.depo:hover .depo__estrelas { transform: scale(1.08); }
 .depo__estrelas { color: var(--dourado); letter-spacing: .12em; font-size: 1rem; }
 .depo__texto { font-style: italic; color: var(--tinta-media); font-size: .97rem; margin: 0; }
 .depo__autor { margin-top: auto; font-size: .88rem; }
@@ -564,7 +581,7 @@ a:hover { color: var(--rosa-escuro); }
 /* ---------- rodapé ---------- */
 .rodape { background: var(--tinta); color: rgba(255, 255, 255, .72); padding: clamp(3rem, 6vw, 4.5rem) 0 1.5rem; font-size: .92rem; }
 .rodape__grade { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 2.5rem; margin-bottom: 2.5rem; }
-.rodape h4 { color: #fff; font-family: var(--corpo); font-size: .8rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 1.1rem; }
+.rodape h4, .rodape__titulo { color: #fff; font-family: var(--corpo); font-size: .8rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 1.1rem; }
 .rodape img { width: 168px; margin-bottom: 1.2rem; filter: brightness(0) invert(1); }
 /* no rodapé a marca fica COLORIDA: sobre o fundo escuro o rosa da marca lê
    melhor que o branco achatado — e, principalmente, `brightness(0) invert(1)`
@@ -577,7 +594,7 @@ a:hover { color: var(--rosa-escuro); }
 .rodape__base { border-top: 1px solid rgba(255, 255, 255, .12); padding-top: 1.5rem; display: flex; flex-wrap: wrap; gap: .8rem 1.5rem; justify-content: space-between; font-size: .8rem; color: rgba(255, 255, 255, .5); }
 .rodape__sociais { display: flex; gap: .7rem; margin-top: 1.2rem; }
 .rodape__sociais a { width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, .1); display: grid; place-items: center; transition: var(--transicao); }
-.rodape__sociais a:hover { background: var(--rosa); transform: translateY(-3px); }
+.rodape__sociais a:hover, .rodape__sociais a:focus-visible { background: var(--rosa); transform: scale(1.08); }
 .rodape__sociais svg { width: 18px; height: 18px; fill: #fff; }
 .rodape__cro { font-size: .82rem; color: rgba(255, 255, 255, .55); margin-top: 1rem; }
 
@@ -597,7 +614,7 @@ a:hover { color: var(--rosa-escuro); }
 .corpo--topo-fixo .capa { margin-top: 76px; }
 .capa { position: relative; min-height: clamp(380px, 56vh, 520px); display: grid; align-items: center; overflow: hidden; }
 /* retratos: enquadrar acima do centro para não cortar o rosto */
-.capa__fundo { position: absolute; inset: 0; background-size: cover; background-position: center 28%; }
+.capa__fundo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 28%; }
 .capa::after {
   content: ''; position: absolute; inset: 0;
   background: linear-gradient(95deg, rgba(20, 10, 15, .84) 0%, rgba(20, 10, 15, .66) 42%, rgba(20, 10, 15, .3) 78%, rgba(20, 10, 15, .12) 100%);
@@ -628,7 +645,7 @@ a:hover { color: var(--rosa-escuro); }
   transform: scaleX(0); transform-origin: 0 50%;
   transition: transform .55s cubic-bezier(.18, .82, .26, 1);
 }
-.proc__item:hover { transform: translateY(-8px); box-shadow: var(--sombra-alta); border-color: rgba(230, 53, 126, .38); }
+.proc__item:hover { box-shadow: var(--sombra-alta); border-color: rgba(230, 53, 126, .38); }
 .proc__item:hover::after { transform: scaleX(1); }
 .proc__item h3 { color: var(--rosa); font-size: 1.22rem; transition: transform var(--transicao); transform-origin: 0 50%; }
 .proc__item:hover h3 { transform: translateX(3px); }
@@ -655,8 +672,9 @@ a:hover { color: var(--rosa-escuro); }
 .post__titulo { font-family: var(--serifa); font-size: 1.24rem; font-weight: 600; line-height: 1.25; color: var(--tinta); }
 .post__resumo { font-size: .92rem; color: var(--tinta-media); line-height: 1.6; }
 .post__leia { margin-top: auto; padding-top: .7rem; font-size: .78rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--rosa); }
-.post:hover { transform: translateY(-8px); box-shadow: var(--sombra-alta); border-color: rgba(230, 53, 126, .38); }
-.post:hover .post__foto img { transform: scale(1.07); }
+@media (hover: hover) { .post:hover { transform: scale(1.02); box-shadow: var(--sombra-alta); border-color: rgba(230, 53, 126, .38); } }
+.post:focus-visible { transform: scale(1.02); }
+.post:hover .post__foto img, .post:focus-visible .post__foto img { transform: scale(1.07); }
 .post__titulo { transition: color var(--transicao); }
 .post:hover .post__titulo { color: var(--rosa); }
 .post__leia { position: relative; display: inline-block; }
@@ -665,7 +683,7 @@ a:hover { color: var(--rosa-escuro); }
   background: var(--rosa); transform: scaleX(0); transform-origin: 0 50%;
   transition: transform .45s cubic-bezier(.18, .82, .26, 1);
 }
-.post:hover .post__leia::after { transform: scaleX(1); }
+.post:hover .post__leia::after, .post:focus-visible .post__leia::after { transform: scaleX(1); }
 .post:focus-visible { outline: 3px solid var(--rosa); outline-offset: 3px; }
 
 /* corpo do artigo — medida de leitura curta, títulos com respiro */
@@ -685,34 +703,41 @@ a:hover { color: var(--rosa-escuro); }
   font-size: .82rem; font-weight: 600; color: var(--tinta); letter-spacing: .04em;
   transition: var(--transicao);
 }
-.outras a:hover { background: var(--rosa); border-color: var(--rosa); color: #fff; transform: translateY(-3px); }
+.outras a:hover, .outras a:focus-visible { background: var(--rosa); border-color: var(--rosa); color: #fff; }
 
 /* ---------- movimento ---------- */
-.rev { opacity: 0; transform: translateY(30px); transition: opacity .9s ease, transform 1s cubic-bezier(.16, .84, .32, 1); }
-.rev.vis { opacity: 1; transform: none; }
+.rev { --d: 0s; transition: opacity .9s ease var(--d), translate 1s var(--curva) var(--d), scale 1s var(--curva) var(--d); }
+.js .rev { opacity: 0; translate: 0 30px; }
+.rev.vis { opacity: 1; translate: none; scale: none; }
 
 /* cascata de grade: --n é o índice do cartão. 55ms por item mantém a fila
    inteira sob ~400ms — acima disso o último cartão parece atrasado, não
    coreografado. O leve `scale` dá profundidade sem overshoot (Premium). */
-.rev--carta { transform: translateY(34px) scale(.972); transform-origin: 50% 100%; }
-.rev--carta.vis { transform: none; }
-.rev--carta { transition-delay: min(calc(var(--n, 0) * 55ms), 385ms); }
+.rev--carta { --d: min(calc(var(--n, 0) * 55ms), 385ms); transform-origin: 50% 100%; }
+.js .rev--carta { translate: 0 34px; scale: .972; }
 /* o conteúdo entra logo atrás do cartão: camada secundária.
    Só nos cartões de TEXTO — em `.esp` e `.post` a foto é o próprio cartão, e
    escondê-la deixaria um retângulo vazio entrando na tela. */
-.cartao.rev--carta > *, .depo.rev--carta > *, .proc__item.rev--carta > * {
-  opacity: 0; transform: translateY(9px);
-  transition: opacity .6s ease, transform .6s cubic-bezier(.16, .84, .32, 1);
+.js .cartao.rev--carta > *, .js .depo.rev--carta > *, .js .proc__item.rev--carta > * {
+  opacity: 0; translate: 0 9px;
+  transition: opacity .6s ease, translate .6s var(--curva);
 }
-.cartao.rev--carta.vis > *, .depo.rev--carta.vis > *, .proc__item.rev--carta.vis > * {
-  opacity: 1; transform: none;
+.js .cartao.rev--carta.vis > *, .js .depo.rev--carta.vis > *, .js .proc__item.rev--carta.vis > * {
+  opacity: 1; translate: none;
   transition-delay: calc(min(calc(var(--n, 0) * 55ms), 385ms) + 140ms);
 }
+/* cartão com entrada: a lista de transição junta os DOIS canais, com o atraso da
+   cascata só na entrada (o hover responde na hora) */
+.cartao.rev, .depo.rev, .proc__item.rev, .esp.rev, .post.rev, .nota.rev {
+  transition: opacity .9s ease var(--d), translate 1s var(--curva) var(--d), scale 1s var(--curva) var(--d),
+              transform .42s var(--curva), box-shadow .5s var(--curva) .04s, border-color .42s var(--curva);
+}
 /* variantes: entradas diferentes evitam a página inteira subindo igual */
-.rev--esq { transform: translateX(-34px); }
-.rev--dir { transform: translateX(34px); }
-.rev--zoom { transform: scale(.94); }
-.rev--esq.vis, .rev--dir.vis, .rev--zoom.vis { transform: none; }
+.js .rev--esq { translate: -34px 0; }
+.js .rev--dir { translate: 34px 0; }
+.js .rev--zoom { translate: none; scale: .94; }
+/* lateral no celular alarga a página durante a carga */
+@media (max-width: 780px) { .js .rev--esq, .js .rev--dir { translate: 0 24px; } }
 
 /* ---------- títulos que se escrevem ----------
    O logo é cursivo, então lá o wipe da esquerda p/ a direita LÊ como escrita.
@@ -767,11 +792,12 @@ a:hover { color: var(--rosa-escuro); }
 /* brilho que atravessa o botão no hover */
 .btn { position: relative; overflow: hidden; }
 .btn::before {
-  content: ''; position: absolute; top: 0; left: -140%; width: 55%; height: 100%;
+  content: ''; position: absolute; top: 0; left: 0; width: 55%; height: 100%;
   background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .42), transparent);
-  transform: skewX(-18deg); transition: left .75s cubic-bezier(.22, .61, .36, 1);
+  transform: translateX(-160%) skewX(-18deg); transition: transform .75s cubic-bezier(.22, .61, .36, 1);
 }
-.btn:hover::before { left: 150%; }
+.btn:hover::before, .btn:focus-visible::before { transform: translateX(260%) skewX(-18deg); }
+.btn:active { transform: scale(.97); transition-duration: .12s; }
 .btn > * { position: relative; z-index: 1; }
 
 /* seta do CTA que avança no hover */
@@ -784,7 +810,7 @@ a:hover { color: var(--rosa-escuro); }
 /* pulso do botão de WhatsApp */
 .zap::after {
   content: ''; position: absolute; inset: 0; border-radius: 50%;
-  border: 2px solid rgba(37, 211, 102, .55); animation: pulsar 2.6s ease-out infinite;
+  border: 2px solid rgba(37, 211, 102, .55); animation: pulsar 2.6s ease-out 1.5s 2;
 }
 @keyframes pulsar {
   0% { transform: scale(1); opacity: .8; }
@@ -821,12 +847,12 @@ a:hover { color: var(--rosa-escuro); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .rev, .rev--esq, .rev--dir, .rev--zoom, .rev--carta { opacity: 1; transform: none; transition: none; }
-  .cartao.rev--carta > *, .depo.rev--carta > *, .proc__item.rev--carta > * {
-    opacity: 1; transform: none; transition: none;
+  .js .rev, .js .rev--esq, .js .rev--dir, .js .rev--zoom, .js .rev--carta { opacity: 1; translate: none; scale: none; transition: none; }
+  .js .cartao.rev--carta > *, .js .depo.rev--carta > *, .js .proc__item.rev--carta > * {
+    opacity: 1; translate: none; transition: none;
   }
+  .esp:hover, .post:hover, .nota:hover, .esp:focus-visible, .post:focus-visible, .nota:focus-visible { transform: none; }
   .cartao::after, .depo::after, .proc__item::after, .post__leia::after { transition: none; }
-  .linha > span { transform: none; }
   .hero__fundo { transition: opacity .01s; transform: none; }
   .mancha, .faixa__trilho, .zap::after { animation: none; }
   * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
@@ -847,6 +873,11 @@ a:hover { color: var(--rosa-escuro); }
     transform: translateX(100%); transition: transform var(--transicao); z-index: 95;
   }
   .topo--aberto .menu { transform: none; }
+  .js .menu { visibility: hidden; transition: transform var(--transicao), visibility 0s linear .42s; }
+  .js .topo--aberto .menu { visibility: visible; transition: transform var(--transicao), visibility 0s; }
+  .menu__veu { position: fixed; inset: 0; z-index: 94; background: rgba(var(--tinta-rgb), .4); opacity: 0; pointer-events: none; transition: opacity var(--transicao); }
+  .topo--aberto .menu__veu { opacity: 1; pointer-events: auto; }
+  .menu a[aria-current]::after { transform: scaleX(1); }
   .menu a { color: var(--tinta); font-size: .95rem; }
   .menu .btn { width: 100%; justify-content: center; }
   .hamburger { position: relative; z-index: 96; }
@@ -875,7 +906,8 @@ a:hover { color: var(--rosa-escuro); }
   background: var(--tinta); color: #fff; box-shadow: var(--sombra-alta);
   transition: transform var(--transicao), box-shadow var(--transicao);
 }
-.nota:hover { color: #fff; transform: translateY(-6px); box-shadow: 0 26px 54px rgba(var(--tinta-rgb), .28); }
+@media (hover: hover) { .nota:hover { color: #fff; transform: scale(1.025); box-shadow: 0 26px 54px rgba(var(--tinta-rgb), .28); } }
+.nota:focus-visible { transform: scale(1.025); }
 .nota__valor { font-family: var(--serifa); font-size: clamp(4.2rem, 9vw, 5.6rem); font-weight: 600; line-height: 1; }
 .nota__estrelas { color: var(--dourado); font-size: 1.35rem; letter-spacing: .18em; }
 .nota__total { font-size: .95rem; color: rgba(255, 255, 255, .78); margin-top: .4rem; }
@@ -976,3 +1008,179 @@ a:hover { color: var(--rosa-escuro); }
   .aviso-previa { margin-inline: auto; }
   .capa__conteudo--despertar { padding-top: 6.5rem; }
 }
+
+
+/* ============================================================
+   INTERAÇÃO + SEO (set/2026)
+   Régua: só transform/opacity animam; nada que se desloque sob o
+   cursor (o que se move é filho/camada); tudo some em reduced-motion;
+   o estado escondido só existe sob .js.
+   ============================================================ */
+
+/* foco visível igual em tudo (antes só alguns cartões tinham o anel) */
+html { -webkit-tap-highlight-color: transparent; }
+:where(a, button, summary, [tabindex]):focus-visible { outline: 3px solid var(--rosa-escuro); outline-offset: 3px; border-radius: 6px; }
+:where(.hero, .capa, .secao--escura, .secao--despertar, .cta-final, .confianca, .rodape, .faixa) :focus-visible { outline-color: #fff; }
+@media (hover: none) {
+  .btn:active, .chips a:active, .outras a:active, .barra-agenda a:active { transform: scale(.97); transition-duration: .1s; }
+}
+
+/* H1 da home em 2 linhas: a busca principal grande, o complemento menor */
+.hero__titulo { margin-bottom: 1.4rem; }
+.hero__titulo-2 { display: block; margin-top: .35em; font-size: .52em; line-height: 1.25; color: #F3E4EA; font-weight: 500; }
+
+/* especialidades: 10 cartões em 2 linhas de 5 */
+.grade--esp { grid-template-columns: repeat(auto-fit, minmax(min(100%, 196px), 1fr)); }
+.esp__foto { translate: var(--px, 0) var(--py, 0); }
+
+/* serviços: H2 de conteúdo + blocos novos */
+.proc__titulo { font-size: clamp(1.4rem, 2.6vw, 1.9rem); margin: 2.2rem 0 1.4rem; }
+.leituras { margin-top: 3.2rem; }
+.leituras__titulo, .outras__titulo {
+  font-family: var(--corpo); font-size: .78rem; font-weight: 600; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--tinta-fraca); margin-bottom: 1rem;
+}
+.artigo__data { max-width: 46em; margin: -1.2rem auto 2rem; font-size: .84rem; color: var(--tinta-fraca); }
+.artigo__servico {
+  max-width: 46em; margin: 2.8rem auto 0; padding: 1.4rem 1.6rem; border-radius: var(--raio);
+  background: var(--cinza-100); border: 1px solid var(--linha); display: flex; flex-direction: column; gap: .2rem;
+}
+.artigo__servico .selo { margin-bottom: .2rem; }
+.artigo__servico-link { font-family: var(--serifa); font-size: 1.25rem; font-weight: 600; color: var(--tinta); }
+.artigo__servico-link span { display: inline-block; color: var(--rosa); transition: transform var(--transicao); }
+.artigo__servico-link:hover, .artigo__servico-link:focus-visible { color: var(--rosa-escuro); }
+.artigo__servico-link:hover span, .artigo__servico-link:focus-visible span { transform: translateX(5px); }
+.despertar-links { margin-top: 2rem; text-align: center; font-size: .95rem; }
+.faq__link { font-weight: 600; }
+
+/* chips das especialidades: os que têm página viram link. Nada se desloca:
+   acende a camada rosa (opacity) e a seta (filha) entra */
+.chips li { padding: 0; background: none; border: 0; }
+.chips a, .chips span {
+  position: relative; isolation: isolate; display: inline-flex; align-items: center; gap: .35rem;
+  padding: .5rem 1rem; min-height: 38px; border-radius: 999px; background: var(--cinza-100);
+  border: 1px solid var(--linha); font-size: .8rem; font-weight: 500; color: var(--tinta);
+}
+.chips a::before {
+  content: ''; position: absolute; inset: -1px; z-index: -1; border-radius: inherit;
+  background: var(--rosa-claro); box-shadow: inset 0 0 0 1.5px var(--rosa); opacity: 0;
+  transition: opacity .3s var(--curva);
+}
+.chips a::after {
+  content: '→'; display: inline-block; color: var(--rosa-escuro); opacity: 0; transform: translateX(-4px);
+  transition: opacity .3s var(--curva), transform .42s var(--curva);
+}
+.chips a:hover, .chips a:focus-visible { color: var(--tinta); }
+.chips a:hover::before, .chips a:focus-visible::before { opacity: 1; }
+.chips a:hover::after, .chips a:focus-visible::after { opacity: 1; transform: none; }
+@media (hover: none) { .chips a::after { opacity: .55; transform: none; } }
+
+/* FAQ: <details> nativo — funciona sem JS e o texto fechado continua indexável.
+   A altura NÃO anima (layout): abre seco e a resposta chega com opacity */
+.faq { max-width: 52em; margin-inline: auto; background: #fff; border: 1px solid var(--linha); border-radius: var(--raio); padding: .4rem 1.6rem; box-shadow: var(--sombra); }
+.faq__item + .faq__item { border-top: 1px solid var(--linha); }
+.faq__pergunta {
+  list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+  gap: 1rem; min-height: 48px; padding: 1.05rem 0; font-family: var(--serifa); font-size: 1.08rem;
+  font-weight: 600; color: var(--tinta); transition: color .3s var(--curva);
+}
+.faq__pergunta::-webkit-details-marker { display: none; }
+.faq__pergunta::after {
+  content: ''; flex: 0 0 14px; height: 14px; transition: transform .42s var(--curva);
+  background: linear-gradient(var(--rosa), var(--rosa)) center / 100% 2px no-repeat,
+              linear-gradient(var(--rosa), var(--rosa)) center / 2px 100% no-repeat;
+}
+.faq__item[open] > .faq__pergunta::after { transform: rotate(135deg); }
+@media (hover: hover) { .faq__pergunta:hover { color: var(--rosa-escuro); } }
+.faq__resposta { padding: 0 0 1.2rem; color: var(--tinta-media); }
+.faq__resposta p { margin-bottom: .6rem; }
+.faq__item[open] .faq__resposta { animation: abrir-faq .42s var(--curva); }
+@keyframes abrir-faq { from { opacity: 0; transform: translateY(-6px); } }
+
+/* WhatsApp: rótulo que explica a ação no hover/foco (o círculo não diz "agendar") */
+.zap__rotulo {
+  position: absolute; right: calc(100% + 10px); top: 50%; white-space: nowrap;
+  padding: .5rem .9rem; border-radius: 999px; background: #fff; color: var(--tinta);
+  font-size: .82rem; font-weight: 600; box-shadow: var(--sombra);
+  opacity: 0; transform: translate(8px, -50%); pointer-events: none;
+  transition: opacity .25s var(--curva), transform .42s var(--curva);
+}
+.zap__rotulo::after { content: ''; position: absolute; left: 100%; top: 0; bottom: 0; width: 12px; }
+@media (hover: hover) {
+  .zap:hover .zap__rotulo, .zap:focus-visible .zap__rotulo { opacity: 1; transform: translate(0, -50%); pointer-events: auto; }
+}
+
+/* voltar ao topo (desktop) */
+.volta-topo {
+  position: fixed; right: calc(1.3rem + 7px); bottom: calc(1.3rem + 58px + .8rem); z-index: 80;
+  width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center;
+  background: #fff; color: var(--tinta); box-shadow: var(--sombra);
+  transition: opacity .3s var(--curva), transform .42s var(--curva), visibility 0s;
+}
+.volta-topo svg { width: 20px; height: 20px; transition: transform .3s var(--curva); }
+.js .volta-topo:not(.volta-topo--vis) {
+  opacity: 0; transform: translateY(10px) scale(.9); visibility: hidden;
+  transition: opacity .3s var(--curva), transform .42s var(--curva), visibility 0s linear .3s;
+}
+@media (hover: hover) { .volta-topo:hover { color: var(--rosa); } .volta-topo:hover svg { transform: translateY(-3px); } }
+
+/* barra de agendamento no celular: nasce visível (CSS); o JS só a RECOLHE
+   onde é redundante (formulário e rodapé na tela, teclado aberto) */
+.barra-agenda { display: none; }
+@media (max-width: 780px) {
+  .barra-agenda {
+    position: fixed; inset: auto 0 0; z-index: 85; display: grid; grid-template-columns: 1fr 1fr; gap: .5rem;
+    padding: .55rem 1rem calc(.55rem + env(safe-area-inset-bottom)); background: rgba(255, 255, 255, .97);
+    box-shadow: 0 -6px 24px rgba(var(--tinta-rgb), .12); transition: transform .32s var(--curva);
+  }
+  .barra-agenda a {
+    display: flex; align-items: center; justify-content: center; gap: .45rem; min-height: 48px; min-width: 0;
+    border-radius: 999px; font-weight: 600; font-size: .92rem; color: var(--tinta); text-align: center;
+  }
+  .barra-agenda svg { width: 20px; height: 20px; flex: none; }
+  .barra-agenda__zap { background: #25D366; }        /* tinta sobre o verde: 8,1:1 (branco daria 2,0) */
+  .barra-agenda__zap svg { fill: var(--tinta); }
+  .barra-agenda__tel { box-shadow: inset 0 0 0 1.5px var(--linha); background: #fff; }
+  .barra-agenda--recolhida { transform: translateY(110%); }
+  body { padding-bottom: calc(68px + env(safe-area-inset-bottom)); }
+  .zap, .volta-topo { display: none; }
+}
+
+/* spotlight: um halo rosa segue o cursor nos cartões de TEXTO (não são link,
+   então não sobem); nas especialidades a FOTO anda dentro da moldura */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .cartao, .proc__item, .depo { isolation: isolate; }
+  .cartao::before, .proc__item::before, .depo::before {
+    content: ''; position: absolute; z-index: -1; pointer-events: none;
+    left: -170px; top: -170px; width: 340px; height: 340px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(230, 53, 126, .10), rgba(230, 53, 126, 0) 62%);
+    transform: translate3d(var(--mx, -999px), var(--my, -999px), 0); opacity: 0;
+    transition: opacity .35s var(--curva);
+  }
+  .cartao:hover::before, .proc__item:hover::before, .depo:hover::before { opacity: 1; }
+  .esp__foto { transition: transform .7s cubic-bezier(.22, .61, .36, 1), translate .5s var(--curva); }
+
+  /* ímã sutil no CTA: o botão anda PARA o cursor (<=6px), então nunca foge dele */
+  .btn--ima { translate: var(--ix, 0) var(--iy, 0);
+              transition: translate .5s var(--curva), transform var(--transicao), box-shadow var(--transicao),
+                          background-color var(--transicao), color var(--transicao); }
+}
+
+/* fundo vivo só anima na tela: fora dela, pausa (GPU de celular fraco) */
+.fora .mancha { animation-play-state: paused; }
+
+@media (prefers-reduced-motion: reduce) {
+  .faq__item[open] .faq__resposta { animation: none; }
+  .barra-agenda, .volta-topo, .zap__rotulo { transition: none; }
+}
+
+/* convite do comparador: só durante a varrida inicial os passos deslizam */
+.comparador--convite .comparador__depois { transition: width .4s var(--curva); }
+.comparador--convite .comparador__alca { transition: left .4s var(--curva); }
+
+/* o botão do menu é link dentro do .menu: sem isto, a cor de link do menu
+   (tinta no cabeçalho sólido e no painel do celular) pintava o texto escuro no rosa */
+.topo .menu .btn, .topo .menu .btn:hover, .topo .menu .btn:focus-visible { color: #fff; }
+/* 1 ou 2 artigos não esticam na largura toda (auto-fill guarda as colunas vazias) */
+.leituras { margin-top: 4rem; }
+.leituras .posts { grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
