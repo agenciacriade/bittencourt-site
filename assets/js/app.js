@@ -402,6 +402,28 @@
     }).observe(marco);
   });
 
+  /* ---- balão de chamada do WhatsApp (desktop): aparece depois de alguns segundos;
+     fechado ou usado, não volta na mesma visita ---- */
+  bloco(function () {
+    var balao = document.querySelector('.zap-balao');
+    if (!balao || matchMedia('(max-width: 780px)').matches) return;
+    var CHAVE = 'bitt-balao-zap';
+    var visto = function () { try { return sessionStorage.getItem(CHAVE) === '1'; } catch (e) { return false; } };
+    var marcar = function () { try { sessionStorage.setItem(CHAVE, '1'); } catch (e) { /* sem storage: some só nesta página */ } };
+    if (visto()) return;
+    var esconder = function () { balao.hidden = true; balao.classList.remove('zap-balao--vis'); marcar(); };
+    setTimeout(function () {
+      if (visto() || document.hidden) return;
+      balao.hidden = false;
+      balao.classList.add('zap-balao--vis');
+    }, 6000);
+    balao.querySelector('.zap-balao__fechar').addEventListener('click', esconder);
+    balao.querySelector('.zap-balao__link').addEventListener('click', esconder);
+    var zap = document.querySelector('.zap');
+    if (zap) zap.addEventListener('click', esconder);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !balao.hidden) esconder(); });
+  });
+
   /* ---- fundo vivo: seção fora da tela pausa as manchas ---- */
   bloco(function () {
     if (!suave || !('IntersectionObserver' in window)) return;
